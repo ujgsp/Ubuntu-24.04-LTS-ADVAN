@@ -112,4 +112,13 @@ Setelah mengaktifkan "Clean Microphone", gunakan setelan berikut agar suara jern
     ```
     Script ini mengatur level mixer hardware dan membuat konfigurasi PipeWire permanen di direktori user.
 
+## Update 23 Februari 2026 (Fix Buzzing & Noise di Discord)
+1.  **Masalah**: Input mikrofon masih berdengung (buzzing) saat digunakan di Discord meskipun noise cancellation dasar sudah aktif.
+2.  **Penyebab**: `Capture` (Gain) terlalu tinggi (100%/+30dB) dan kurangnya filter frekuensi rendah.
+3.  **Tindakan**:
+    - Menurunkan `Capture` ke **75%** (+22.50dB) untuk mengurangi noise floor.
+    - Menambahkan `webrtc.high_pass_filter = true` untuk membuang dengungan (humming).
+    - Menambahkan `webrtc.gain_control = true` untuk mencegah distorsi suara.
+4.  **Status**: Menunggu konfirmasi user setelah menjalankan update script `fix-noise.sh`.
+
 Perbaikan selesai dan suara terkonfirmasi jernih di berbagai aplikasi. File ini disimpan sebagai referensi akhir.

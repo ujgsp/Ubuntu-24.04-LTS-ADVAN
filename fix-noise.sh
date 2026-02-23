@@ -1,16 +1,18 @@
 #!/bin/bash
 
 # 1. Set Mixer Levels (Hardware)
-echo "Setting hardware mixer levels..."
-amixer -c 0 sset 'Internal Mic Boost' 1
-amixer -c 0 sset 'Capture' 80%
+# Capture diturunkan ke 75% (+22.50dB) untuk mencegah suara pecah dan dengungan berlebih
+echo "Menyetel level hardware mixer..."
+amixer -c 0 sset 'Internal Mic Boost' 0
+amixer -c 0 sset 'Capture' 75%
 
-# 2. Create PipeWire Config Directory
-echo "Creating PipeWire configuration directory..."
+# 2. Membuat Direktori Konfigurasi PipeWire (jika belum ada)
+echo "Memastikan direktori PipeWire ada..."
 mkdir -p ~/.config/pipewire/pipewire.conf.d/
 
-# 3. Create Noise Cancellation Config
-echo "Creating permanent noise suppression config..."
+# 3. Membuat Konfigurasi Denoising yang Lebih Agresif
+# Ditambahkan: High Pass Filter (menghapus dengungan rendah) dan Gain Control
+echo "Memperbarui konfigurasi Clean Microphone (High-pass + Gain Control)..."
 cat <<EOF > ~/.config/pipewire/pipewire.conf.d/99-input-denoising.conf
 context.modules = [
 {   name = libpipewire-module-echo-cancel
@@ -22,11 +24,23 @@ context.modules = [
         aec.args = {
             "webrtc.noise_suppression" = true
             "webrtc.extended_filter" = true
+            "webrtc.high_pass_filter" = true
+            "webrtc.gain_control" = true
+            "webrtc.typing_detection" = true
         }
     }
 }
 ]
 EOF
 
-echo "Done! Please restart your computer or run 'systemctl --user restart pipewire' to apply changes."
-echo "Then, in SimpleScreenRecorder, select 'Clean Microphone' as your audio source."
+# 4. Restart PipeWire untuk menerapkan perubahan
+echo "Menerapkan perubahan..."
+systemctl --user restart pipewire
+
+echo ""
+echo "Selesai! Sekarang silakan lakukan hal berikut:"
+echo "1. Di Discord (Settings > Voice & Video):"
+echo "   - Pilih Input Device: 'Clean Microphone'"
+echo "   - Matikan Noise Suppression (Krisp) jika suara masih aneh (agar tidak dobel)"
+echo "2. Jika suara masih terlalu pelan, naikkan perlahan 'Capture' dengan perintah:"
+echo "   amixer -c 0 sset 'Capture' 85%"
